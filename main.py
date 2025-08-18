@@ -106,6 +106,7 @@ def simulateRace(teamdict, track, max_dnfs):
     # Sort descending
     results.sort(key=lambda x: x[1], reverse=True)
 
+    clear_console()
     print(f"Race at {track.name} Results:")
     for pos, (driver, score) in enumerate(results, start=1):
         if pos <= 10:
@@ -194,7 +195,7 @@ def simulateChampionship(teamdict, max_dnfs):
             top_two_points = sum(sorted(pts_list, reverse=True)[:2])
             constructor_lookup[team_name].points += top_two_points
 
-
+    clear_console()
     # === Final Driver Standings ===
     champ_results = sorted(drivers, key=lambda d: d.points, reverse=True)
     print("\n🏁 Drivers Championship Standings 🏁")
@@ -221,8 +222,6 @@ def simulateChampionship(teamdict, max_dnfs):
             print_rgb(f"{pos}.\t{constructor.name} - {constructor.points} pts", colour)
         else:
             print(f"{pos}.\t{constructor.name} - {constructor.points} pts")
-
-
 
 # === Lists and Variables ===
 drivers = retrieveDrivers()
@@ -350,8 +349,12 @@ def main():
                         print_rgb(f"{tracks.index(track) + 1}.\t{track.name} ({track.length} km)", TRACK_RGB["short"])
                     else:
                         print(f"{tracks.index(track) + 1}.\t{track.name} ({track.length} km)")
+                print_rgb(f"{len(tracks) + 1}.\tRandom Track", (0, 0, 255))
                 inp3 = int(input("Selection: "))
-                track = tracks[inp3 - 1]
+                if inp3 == 25:
+                    track = tracks[random.randint(0, 24)]
+                else:
+                    track = tracks[inp3 - 1]
                 simulateRace(constructor_lookup, track, settings_options[0].value)
             case 2:
                 for driver in drivers:
