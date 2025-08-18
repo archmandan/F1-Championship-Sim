@@ -53,10 +53,26 @@ Interested in contributing? Here's how you can get started:
 ## 📝 Customisation
 Interested in customising the game? Here's what you can do!
 
-1. Add teams or drivers in the SQLite Database*
-2. Add tracks*
+1. Add teams or drivers in the SQLite Database
+2. Add tracks
 
-\*These additions will require you to change parts of the script (TEAM_RGB and others) 
+(Use the following SQLite code to do this)
+
+- ```INSERT INTO Constructors (name, performance, base, power_unit, team_principal)```
+
+    ```VALUES (name, performance, base, power_unit, team_principal)```
+
+- ```INSERT INTO Drivers (name, skill, team_id)```
+
+    ```VALUES (name, skill, team_id)```
+
+- ```INSERT INTO Tracks (name, length, difficulty, country, first_gp)```
+
+    ```VALUES (name, length, difficulty, country, first_gp)```
+
+Ensure you change the values to your own team, driver or track info
+
+\* Tracks will require you to edit `TRACK_CHAOS` in main.py
 
 ## 📚 License
 
