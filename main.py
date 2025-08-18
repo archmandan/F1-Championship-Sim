@@ -77,11 +77,12 @@ def clear_console():
     os.system("clear" if os.name == 'posix' else "cls")
 
 # === Sim Race ===
-def simulateRace(teamdict, track, dnf_amount):
+def simulateRace(teamdict, track, max_dnfs):
+    scoring = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1]
     dnfs = []
-    drivers_race = drivers
-    for i in range(dnf_amount):
-        dnf = random.choice(drivers)
+    drivers_race = drivers.copy()
+    for i in range(random.randint(0, max_dnfs)):
+        dnf = random.choice(drivers_race)
         drivers_race.remove(dnf)
         dnfs.append(dnf)
     results = []
@@ -107,6 +108,8 @@ def simulateRace(teamdict, track, dnf_amount):
 
     print(f"Race at {track.name} Results:")
     for pos, (driver, score) in enumerate(results, start=1):
+        if pos <= 10:
+            driver.points += scoring[pos - 1]
         if colourise_enabled:
             if pos == 1:
                 colour = POSITION_RGB["P1"]
@@ -118,12 +121,108 @@ def simulateRace(teamdict, track, dnf_amount):
                 colour = POSITION_RGB["POINTS"]
             else:
                 colour = POSITION_RGB["NO POINTS"]
-            print_rgb(f"{pos}.\t{driver}", colour)
+            print_rgb(f"{pos}.\t{driver} - {driver.points} pts", colour)
         else:
-            print(f"{pos}.\t{driver}")
+            print(f"{pos}.\t{driver} - {driver.points} pts")
     for driver in dnfs:
         if colourise_enabled:
             print_rgb(f"DNF.\t{driver}", POSITION_RGB["DNF"])
+        else:
+            print(f"DNF.\t{driver}")
+
+def simulateChampionship(teamdict, max_dnfs):
+    scoring = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1]
+    tracks_champ = tracks.copy()
+    champ_results = []
+
+    # Reset driver and constructor points
+    for driver in drivers:
+        driver.points = 0
+    for constructor in constructors:
+        constructor.points = 0
+
+    # Simulate each race
+    for race_num in range(24):
+        # Select random track and remove from remaining tracks
+        track = random.choice(tracks_champ)
+        tracks_champ.remove(track)
+
+        dnfs = []
+        drivers_race = drivers.copy()
+        # Random DNFs
+        dnf_amount = random.randint(0, max_dnfs)
+        for _ in range(dnf_amount):
+            if drivers_race:
+                dnf = random.choice(drivers_race)
+                drivers_race.remove(dnf)
+                dnfs.append(dnf)
+
+        # Calculate scores for drivers
+        results = []
+        for driver in drivers_race:
+            team = teamdict.get(driver.team)
+            chaos = TRACK_CHAOS.get(track.name, 10)
+
+            # Base score heavily weighted on skill and team
+            base_score = (driver.skill * 0.7) + (team.performance * 0.7) - track.difficulty
+
+            # Randomness proportional to track chaos but capped
+            rand = random.gauss(0, chaos)
+            rand = max(min(rand, 10), -10)
+
+            # Occasional tiny underdog chance
+            underdog = random.uniform(0, 5) if random.random() < 0.02 else 0
+
+            score = base_score + rand + underdog
+            results.append((driver, score))
+
+        # Sort descending by score
+        results.sort(key=lambda x: x[1], reverse=True)
+
+        # Award points to drivers
+        for pos, (driver, score) in enumerate(results, start=1):
+            if pos <= 10:
+                driver.points += scoring[pos - 1]
+
+        # Award points to constructors (top 2 drivers per race only)
+        constructor_scores = {}
+        for pos, (driver, _) in enumerate(results, start=1):
+            points_this_race = scoring[pos - 1] if pos <= 10 else 0
+            constructor_scores.setdefault(driver.team, []).append(points_this_race)
+
+        for team_name, pts_list in constructor_scores.items():
+            top_two_points = sum(sorted(pts_list, reverse=True)[:2])
+            constructor_lookup[team_name].points += top_two_points
+
+
+    # === Final Driver Standings ===
+    champ_results = sorted(drivers, key=lambda d: d.points, reverse=True)
+    print("\n🏁 Drivers Championship Standings 🏁")
+    for pos, driver in enumerate(champ_results, start=1):
+        if colourise_enabled:
+            if pos == 1:
+                colour = POSITION_RGB["P1"]
+            elif pos == 2:
+                colour = POSITION_RGB["P2"]
+            elif pos == 3:
+                colour = POSITION_RGB["P3"]
+            else:
+                colour = POSITION_RGB["POINTS"]
+            print_rgb(f"{pos}.\t{driver} - {driver.points} pts", colour)
+        else:
+            print(f"{pos}.\t{driver} - {driver.points} pts")
+
+    # === Final Constructor Standings ===
+    constructor_results = sorted(constructors, key=lambda c: c.points, reverse=True)
+    print("\n🏁 Constructors Championship Standings 🏁")
+    for pos, constructor in enumerate(constructor_results, start=1):
+        if colourise_enabled:
+            colour = POSITION_RGB["POINTS"] if pos > 3 else POSITION_RGB[f"P{pos}"]
+            print_rgb(f"{pos}.\t{constructor.name} - {constructor.points} pts", colour)
+        else:
+            print(f"{pos}.\t{constructor.name} - {constructor.points} pts")
+
+
 
 # === Lists and Variables ===
 drivers = retrieveDrivers()
@@ -141,18 +240,18 @@ menu_options = [
 ]
 option_status = {
     "Simulate a Race": True,
-    "Simulate a Championship": False,
+    "Simulate a Championship": True,
     "View current drivers": True,
     "View current teams": True,
     "View current tracks": True,
     "Settings": True,
     "Exit": True,
-    "Add DNFs": True,
+    "Max DNFs": True,
     "Toggle Colourise": True,
-    "Back to Main Menu": False
+    "Back to Main Menu": True
 }
 settings_options = [
-    f1.Setting("Add DNFs", 0),
+    f1.Setting("Max DNFs", 0),
     f1.Setting("Toggle Colourise", True)
 ]
 constructor_lookup = {c.name: c for c in constructors}
@@ -231,6 +330,10 @@ def main():
         clear_console()
         match inp:
             case 1:
+                for driver in drivers:
+                    driver.points = 0
+                for team in constructors:
+                    team.points = 0
                 print("Select a track: ")
                 for track in far:
                     if colourise_enabled:
@@ -251,7 +354,12 @@ def main():
                 track = tracks[inp3 - 1]
                 simulateRace(constructor_lookup, track, settings_options[0].value)
             case 2:
-                pass
+                for driver in drivers:
+                    driver.points = 0
+                for team in constructors:
+                    team.points = 0
+                simulateChampionship(constructor_lookup, settings_options[0].value)
+
             case 3:
                 for driver in drivers:
                     if colourise_enabled:
@@ -303,9 +411,9 @@ def main():
                     match inp1:
                         case 1:
                             while True:
-                                inp2 = int(input("How many maximum DNFs (per race): (0-5) "))
+                                inp2 = int(input("How many maximum DNFs (per race): (0-19) "))
                                 clear_console()
-                                if inp2 < 0 or inp2 > 5:
+                                if inp2 < 0 or inp2 > 19:
                                     print(f"Invalid amount: {inp2}")
                                 else:
                                     settings_options[0].value = inp2
