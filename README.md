@@ -4,20 +4,22 @@ Welcome to the **F1 Championship Simulator**, a console-based Python application
 
 ## 🚗 Overview
 
-This simulator emulates a full Formula 1 season, considering various factors like:
+This simulator currently emulates a Formula 1 race, considering various factors like:
 
 - **Driver Skill:** Each driver's performance and consistency.
 - **Team Performance:** The capabilities and strategies of different teams.
 - **Track Difficulty:** Challenges posed by each circuit, inspired by EA F1 25 AI ratings.
+- **DNFs:** Add any amount of DNFs in settings.
 
-Race results and season standings are dynamically generated, providing a unique experience with every simulation.
+Race results are dynamically generated, providing a unique experience with every simulation.
 
 ## 🔧 Features
 
-- Simulate an entire F1 season with multiple races.
+- Simulate entire races with DNFs and other factors.
+- Simulate an entire F1 season with multiple races. (COMING SOON)
 - Adjustable track difficulties based on real-world data.
-- Stores race and season data in an SQLite database.
-- Easy to extend with new tracks, drivers, or custom rules.
+- Stores track, team and driver data in an SQLite database.
+- Easy to extend with new tracks, drivers and teams.
 - Console-based interface for quick and immersive gameplay.
 
 ## 📦 Installation
@@ -47,6 +49,14 @@ Interested in contributing? Here's how you can get started:
 2. Create a new branch for your feature or bug fix.
 3. Make your changes and commit them with descriptive messages.
 4. Push your changes and submit a pull request for review.
+
+## 📝 Customisation
+Interested in customising the game? Here's what you can do!
+
+1. Add teams or drivers in the SQLite Database*
+2. Add tracks*
+
+\*These additions will require you to change parts of the script (TEAM_RGB and others) 
 
 ## 📚 License
 
