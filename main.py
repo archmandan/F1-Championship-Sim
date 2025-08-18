@@ -28,7 +28,7 @@ def retrieveConstructors():
     c = conn.cursor()
 
     c.execute("""
-        SELECT name, performance FROM Constructors
+        SELECT name, performance, team_principal FROM Constructors
         ORDER BY performance DESC;
     """)
 
@@ -36,7 +36,7 @@ def retrieveConstructors():
     teams = []
 
     for row in results:
-        teams.append(f1.Constructor(row[0], row[1]))
+        teams.append(f1.Constructor(row[0], row[1], row[2]))
 
     return teams
 
@@ -374,9 +374,9 @@ def main():
                 for team in constructors:
                     if colourise_enabled:
                         rgb = TEAM_RGB.get(team.name, (255, 255, 255))
-                        print_rgb(f"{constructors.index(team) + 1}.\t{team.name} - Performance: {team.performance}", rgb)
+                        print_rgb(f"{constructors.index(team) + 1}.\t{team.name} - Principal: {team.team_principal}", rgb)
                     else:
-                        print(f"{constructors.index(team) + 1}.\t{team.name} - Performance: {team.performance}")
+                        print(f"{constructors.index(team) + 1}.\t{team.name} - Principal: {team.team_principal}")
             case 5:
                 for track in far:
                     if colourise_enabled:

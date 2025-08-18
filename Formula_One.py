@@ -11,10 +11,11 @@ class Driver:
         return f"{self.name} ({self.team})"
 
 class Constructor:
-    def __init__(self, name, performance, points=0):
+    def __init__(self, name, performance, team_principal, points=0):
         self.name = name
         self.performance = performance
         self.points = points
+        self.team_principal = team_principal
 
     def __str__(self):
         return self.name
