@@ -18,9 +18,10 @@ class Constructor:
         return self.name
 
 class Track:
-    def __init__(self, name, length):
+    def __init__(self, name, length, difficulty):
         self.name = name
         self.length = float(length)
+        self.difficulty = difficulty
 
     def __str__(self):
         return f"{self.name} ({self.length} km)"

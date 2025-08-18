@@ -45,7 +45,7 @@ def retrieveTracks():
     c = conn.cursor()
 
     c.execute("""
-        SELECT name, length FROM Tracks
+        SELECT name, length, difficulty FROM Tracks
         ORDER BY length DESC;
     """)
 
@@ -53,7 +53,7 @@ def retrieveTracks():
     tracks = []
 
     for row in results:
-        tracks.append(f1.Track(row[0], float(row[1])))
+        tracks.append(f1.Track(row[0], float(row[1]), row[2]))
 
     return tracks
 
@@ -77,8 +77,53 @@ def clear_console():
     os.system("clear" if os.name == 'posix' else "cls")
 
 # === Sim Race ===
-def simulateRace():
-    pass
+def simulateRace(teamdict, track, dnf_amount):
+    dnfs = []
+    drivers_race = drivers
+    for i in range(dnf_amount):
+        dnf = random.choice(drivers)
+        drivers_race.remove(dnf)
+        dnfs.append(dnf)
+    results = []
+    for driver in drivers_race:
+        team = teamdict.get(driver.team)
+        chaos = TRACK_CHAOS.get(track.name, 10)
+
+        # Base score heavily weighted on skill and team
+        base_score = (driver.skill * 0.7) + (team.performance * 0.7) - track.difficulty
+
+        # Randomness proportional to track chaos but capped
+        rand = random.gauss(0, chaos)
+        rand = max(min(rand, 10), -10)  # cap to ±10
+
+        # Occasional tiny underdog chance
+        underdog = random.uniform(0, 5) if random.random() < 0.02 else 0
+
+        score = base_score + rand + underdog
+        results.append((driver, score))
+
+    # Sort descending
+    results.sort(key=lambda x: x[1], reverse=True)
+
+    print(f"Race at {track.name} Results:")
+    for pos, (driver, score) in enumerate(results, start=1):
+        if colourise_enabled:
+            if pos == 1:
+                colour = POSITION_RGB["P1"]
+            elif pos == 2:
+                colour = POSITION_RGB["P2"]
+            elif pos == 3:
+                colour = POSITION_RGB["P3"]
+            elif pos <= 10:
+                colour = POSITION_RGB["POINTS"]
+            else:
+                colour = POSITION_RGB["NO POINTS"]
+            print_rgb(f"{pos}.\t{driver}", colour)
+        else:
+            print(f"{pos}.\t{driver}")
+    for driver in dnfs:
+        if colourise_enabled:
+            print_rgb(f"DNF.\t{driver}", POSITION_RGB["DNF"])
 
 # === Lists and Variables ===
 drivers = retrieveDrivers()
@@ -106,6 +151,14 @@ option_status = {
     "Toggle Colourise": True,
     "Back to Main Menu": False
 }
+settings_options = [
+    f1.Setting("Add DNFs", 0),
+    f1.Setting("Toggle Colourise", True)
+]
+constructor_lookup = {c.name: c for c in constructors}
+colourise_enabled = bool(settings_options[1].value)  # default is ON
+
+# === Constants ===
 TEAM_RGB = {
     "Mercedes-AMG Petronas F1 Team": (0, 215, 182),
     "Oracle Red Bull Racing": (71, 129, 215),
@@ -132,14 +185,35 @@ POSITION_RGB = {
     "P2": (196, 196, 196),
     "P3": (183, 65, 14),
     "POINTS": (48, 92, 222),
-    "NO POINTS": (211, 211, 211)
+    "NO POINTS": (211, 211, 211),
+    "DNF": (255, 0, 0)
 }
-settings_options = [
-    f1.Setting("Add DNFs", 0),
-    f1.Setting("Toggle Colourise", True)
-]
-colourise_enabled = bool(settings_options[1].value)  # default is ON
-
+TRACK_CHAOS = {
+    "Melbourne Grand Prix Circuit": 15,
+    "Shanghai International Circuit": 10,
+    "Suzuka International Racing Course": 12,
+    "Bahrain International Circuit": 8,
+    "Jeddah Corniche Circuit": 20,
+    "Miami International Autodrome": 12,
+    "Autodromo Enzo e Dino Ferrari": 10,
+    "Circuit de Monaco": 25,
+    "Circuit de Barcelona-Catalunya": 8,
+    "Circuit Gilles-Villeneuve": 15,
+    "Red Bull Ring": 10,
+    "Silverstone Circuit": 10,
+    "Circuit de Spa-Francorchamps": 15,
+    "Hungaroring": 12,
+    "Circuit Zandvoort": 18,
+    "Autodromo Nazionale Monza": 5,
+    "Baku City Circuit": 20,
+    "Marina Bay Street Circuit": 20,
+    "Circuit of The Americas": 12,
+    "Autodromo Hermanos Rodriguez": 15,
+    "Autódromo José Carlos Pace": 15,
+    "Las Vegas Strip Circuit": 18,
+    "Losail International Circuit": 10,
+    "Yas Marina Circuit": 12
+}
 
 # === Main Loop ===
 def main():
@@ -157,7 +231,25 @@ def main():
         clear_console()
         match inp:
             case 1:
-                simulateRace()
+                print("Select a track: ")
+                for track in far:
+                    if colourise_enabled:
+                        print_rgb(f"{tracks.index(track) + 1}.\t{track.name} ({track.length} km)", TRACK_RGB["far"])
+                    else:
+                        print(f"{tracks.index(track) + 1}.\t{track.name} ({track.length} km)")
+                for track in medium:
+                    if colourise_enabled:
+                        print_rgb(f"{tracks.index(track) + 1}.\t{track.name} ({track.length} km)", TRACK_RGB["medium"])
+                    else:
+                        print(f"{tracks.index(track) + 1}.\t{track.name} ({track.length} km)")
+                for track in short:
+                    if colourise_enabled:
+                        print_rgb(f"{tracks.index(track) + 1}.\t{track.name} ({track.length} km)", TRACK_RGB["short"])
+                    else:
+                        print(f"{tracks.index(track) + 1}.\t{track.name} ({track.length} km)")
+                inp3 = int(input("Selection: "))
+                track = tracks[inp3 - 1]
+                simulateRace(constructor_lookup, track, settings_options[0].value)
             case 2:
                 pass
             case 3:
