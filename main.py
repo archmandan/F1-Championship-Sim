@@ -140,7 +140,7 @@ menu_options = [
     "Exit"
 ]
 option_status = {
-    "Simulate a Race": False,
+    "Simulate a Race": True,
     "Simulate a Championship": False,
     "View current drivers": True,
     "View current teams": True,
