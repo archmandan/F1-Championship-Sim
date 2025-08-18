@@ -95,7 +95,7 @@ def simulateRace(teamdict, track, max_dnfs):
 
         # Randomness proportional to track chaos but capped
         rand = random.gauss(0, chaos)
-        rand = max(min(rand, 10), -10)  # cap to ±10
+        rand = max(min(rand, 10), -10)
 
         # Occasional tiny underdog chance
         underdog = random.uniform(0, 5) if random.random() < 0.02 else 0
@@ -250,7 +250,7 @@ option_status = {
     "Back to Main Menu": True
 }
 settings_options = [
-    f1.Setting("Max DNFs", 0),
+    f1.Setting("Max DNFs", 10),
     f1.Setting("Toggle Colourise", True)
 ]
 constructor_lookup = {c.name: c for c in constructors}
