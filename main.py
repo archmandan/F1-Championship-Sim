@@ -57,6 +57,15 @@ def retrieveTracks():
 
     return tracks
 
+# Settings Class
+class Setting:
+    def __init__(self, name, value):
+        self.name = name
+        self.value = value
+
+    def __str__(self):
+        return f"{self.name} - {self.value}"
+
 # === Other Functions ===
 def print_rgb(text, rgb):
     r, g, b = rgb
@@ -235,6 +244,7 @@ menu_options = [
     "View current teams",
     "View current tracks",
     "Settings",
+    "Edit Teams/Drivers/Tracks",
     "Exit"
 ]
 option_status = {
@@ -244,15 +254,24 @@ option_status = {
     "View current teams": True,
     "View current tracks": True,
     "Settings": True,
+    "Edit Teams/Drivers/Tracks": False,
     "Exit": True,
     "Max DNFs": True,
     "Toggle Colourise": True,
-    "Back to Main Menu": True
+    "Add new team": False,
+    "Add new driver": False,
+    "Replace driver": 
 }
 settings_options = [
-    f1.Setting("Max DNFs", 10),
-    f1.Setting("Toggle Colourise", True)
+    Setting("Max DNFs", 10),
+    Setting("Toggle Colourise", True)
 ]
+edit_options = [
+    "Add new team",
+    "Add new driver",
+    "Replace driver"
+]
+
 constructor_lookup = {c.name: c for c in constructors}
 colourise_enabled = bool(settings_options[1].value)  # default is ON
 
@@ -429,6 +448,21 @@ def main():
                         case _:
                             print("Invalid choice")
             case 7:
+                while True:
+                    if colourise_enabled:
+                        i = 1
+                        for option in edit_options:
+                            colour = MENU_RGB["enabled"] if option_status.get(option, True) else MENU_RGB["disabled"]
+                            print_rgb(f"{edit_options.index(option) + 1}.\t{option}", colour)
+                            i += 1
+                        print_rgb(f"{i}.\tBack to main menu", MENU_RGB["enabled"])
+                        inp = int(input("Select an option: "))
+                        match inp:
+                            case 4:
+                                break
+                            case _:
+                                print("Invalid choice")                            
+            case 8:
                 print("Thanks for playing! Ciao")
                 sys.exit()
             case _:
