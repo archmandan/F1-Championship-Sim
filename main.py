@@ -254,13 +254,13 @@ option_status = {
     "View current teams": True,
     "View current tracks": True,
     "Settings": True,
-    "Edit Teams/Drivers/Tracks": False,
+    "Edit Teams/Drivers/Tracks": True,
     "Exit": True,
     "Max DNFs": True,
     "Toggle Colourise": True,
     "Add new team": False,
     "Add new driver": False,
-    "Replace driver": 
+    "Replace driver": False
 }
 settings_options = [
     Setting("Max DNFs", 10),
@@ -457,6 +457,7 @@ def main():
                             i += 1
                         print_rgb(f"{i}.\tBack to main menu", MENU_RGB["enabled"])
                         inp = int(input("Select an option: "))
+                        clear_console()
                         match inp:
                             case 4:
                                 break
